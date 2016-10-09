@@ -5,7 +5,7 @@
 #include <Windows.h>
 
 char convert_it(char *, char *, int*, int*, int, bool, bool,bool);
-int calculate(char *);
+int calculate(char *, int*, int, int, int*);
 
 int main()
 {
@@ -13,7 +13,7 @@ int main()
 	char *c1 = new char[500], *c2 = new char[1000];
 	scanf("%s", c1);
 	char error;
-	int *fromnum = new int, *tonum = new int;
+	int *fromnum = new int, *tonum = new int, result;
 	*fromnum = 0;
 	*tonum = 0;
 	error = convert_it(c1, c2, fromnum, tonum, strlen(c1), false, false,false);
@@ -21,6 +21,12 @@ int main()
 	{
 	case 1:
 		printf(c2);
+		*fromnum = 0;
+		result = calculate(c2, fromnum, *tonum, 0, space);
+		if (*space)
+			printf("表达式错误");
+		else
+			printf("结果=%d",result);
 		break;
 	case 2:
 		printf("错误：缺少括号\")\"\n");
@@ -122,7 +128,21 @@ char convert_it(char *from, char *to, int *fromnum, int *tonum, int length, bool
 	return 1;
 }
 
-int calculate(char *cal)
+int calculate(char *cal,int *begin, int length, int num1)
 {
-	return 0;
+	int num2;
+	while (*begin < length)
+	{
+		if (cal[*begin] >= '0' && cal[*begin] <= '9')
+		{
+			num2 *= 10;
+			num2 += cal[(*begin)++] - '0';
+		}
+		if (cal[*begin] == ' ')
+		{
+			(*begin)++;
+			calculate(cal, begin, length, num2);
+		}
+	}
+	return num1;
 }
