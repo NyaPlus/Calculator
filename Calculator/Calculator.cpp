@@ -10,7 +10,7 @@ int calculate(char *, int*, int, int);
 
 int main()
 {
-	printf("支持+加-减*乘/除()括号^幂!阶乘\n优先级：括号>阶乘=幂>乘除>加减\n请输入算式：");
+	printf("支持整数的+加-减*乘/除()括号^幂!阶乘\n优先级：括号>阶乘=幂>乘除>加减\n请输入算式：");
 	char *c1 = new char[500], *c2 = new char[1000];
 	scanf("%s", c1);
 	char error;
