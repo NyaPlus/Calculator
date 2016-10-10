@@ -3,9 +3,10 @@
 
 #include "stdafx.h"
 #include <Windows.h>
+#include <math.h>
 
 char convert_it(char *, char *, int*, int*, int, bool, bool,bool);
-int calculate(char *, int*, int, int, int*);
+int calculate(char *, int*, int, int);
 
 int main()
 {
@@ -13,29 +14,27 @@ int main()
 	char *c1 = new char[500], *c2 = new char[1000];
 	scanf("%s", c1);
 	char error;
-	int *fromnum = new int, *tonum = new int, result;
+	int *fromnum = new int, *tonum = new int;
 	*fromnum = 0;
 	*tonum = 0;
 	error = convert_it(c1, c2, fromnum, tonum, strlen(c1), false, false,false);
 	switch (error)
 	{
 	case 1:
-		printf(c2);
 		*fromnum = 0;
-		result = calculate(c2, fromnum, *tonum, 0, space);
-		if (*space)
-			printf("表达式错误");
-		else
-			printf("结果=%d",result);
+		printf("结果=%d\n", calculate(c2, fromnum, *tonum, 0));
 		break;
 	case 2:
 		printf("错误：缺少括号\")\"\n");
 		break;
 	case 3:
-		printf("错误：存在多余的括号\")\"");
+		printf("错误：存在多余的括号\")\"\n");
+		break;
+	case 4:
+		printf("错误：表达式错误，位于第%d个字符\n", (*fromnum)+1);
 		break;
 	default:
-		printf("错误：检测到非法字符\"%c\"，位于第%d个字符", error, (*fromnum)+1);
+		printf("错误：检测到非法字符\"%c\"，位于第%d个字符\n", error, (*fromnum)+1);
 		break;
 	}
 	system("pause");
@@ -48,14 +47,16 @@ int main()
 
 char convert_it(char *from, char *to, int *fromnum, int *tonum, int length, bool isaddorsub, bool ismulordiv, bool ispow)
 {
-	bool mul = false;
+	bool mul = false, numed=false ,mulmul = false;
 	char temp;
 	char error;
-	while (*fromnum < length)
+	while (*fromnum <= length)
 	{
 		
 		if (from[*fromnum] == '(')
 		{
+			numed = true;
+			mulmul = false;
 			if (from[*fromnum - 1] >= '0' && from[*fromnum - 1] <= '9')
 			{
 				to[(*tonum)++] = ' ';
@@ -74,63 +75,88 @@ char convert_it(char *from, char *to, int *fromnum, int *tonum, int length, bool
 		}
 		if ((from[*fromnum] >= '0' && from[*fromnum] <= '9'))
 		{
+			if (mulmul)
+				return 4;
+			numed = true;
 			to[(*tonum)++] = from[(*fromnum)++];
 		}
 		else if (from[*fromnum] == '!')
 		{
+			if (!numed)
+				return 4;
+			mulmul = true;
 			to[(*tonum)++] = from[(*fromnum)++];
-			to[(*tonum)++] = ' ';
 		}
 		else if (from[*fromnum] == '^')
 		{
+			if (!numed)
+				return 4;
 			if (ispow)
 				return 0;
+			numed = false;
+			mulmul = false;
 			to[(*tonum)++] = ' ';
 			temp = from[(*fromnum)++];
 			error = convert_it(from, to, fromnum, tonum, length, isaddorsub, ismulordiv,true);
 			to[(*tonum)++] = temp;
-			if (error != 1 && error != 0)
+			if (error)
 				return error;
+			numed = true;
 		}
 		else if (from[*fromnum] == '*' || from[*fromnum] == '/')
 		{
+			if (!numed)
+				return 4;
 			if (ispow || ismulordiv)
 				return 0;
+			numed = false;
+			mulmul = false;
 			to[(*tonum)++] = ' ';
 			temp = from[(*fromnum)++];
 			error = convert_it(from, to, fromnum, tonum, length, isaddorsub, true,false);
 			to[(*tonum)++] = temp;
-			if (error != 1 && error != 0)
+			if (error)
 				return error;
+			numed = true;
 		}
 		else if (from[*fromnum] == '+' || from[*fromnum] == '-')
 		{
+			if (!numed)
+				return 4;
 			if (ispow || ismulordiv || isaddorsub)
 				return 0;
+			numed = false;
+			mulmul = false;
 			to[(*tonum)++] = ' ';
 			temp = from[(*fromnum)++];
 			error = convert_it(from, to, fromnum, tonum, length, true, false,false);
 			to[(*tonum)++] = temp;
-			if (error != 1 && error != 0)
+			if (error)
 				return error;
+			numed = true;
 		}
 		else if (from[*fromnum] == ')')
 		{
 			(*fromnum)++;
 			return 3;
 		}
+		else if (from[*fromnum] == 0)
+		{
+			if (!numed)
+				return 4;
+			(*fromnum)++;
+		}
 		else
 		{
 			return from[*fromnum];
 		}
 	}
-	to[*tonum] = 0;
 	return 1;
 }
 
 int calculate(char *cal,int *begin, int length, int num1)
 {
-	int num2;
+	int num2 = 0;
 	while (*begin < length)
 	{
 		if (cal[*begin] >= '0' && cal[*begin] <= '9')
@@ -138,11 +164,46 @@ int calculate(char *cal,int *begin, int length, int num1)
 			num2 *= 10;
 			num2 += cal[(*begin)++] - '0';
 		}
-		if (cal[*begin] == ' ')
+		else if (cal[*begin] == ' ')
 		{
 			(*begin)++;
-			calculate(cal, begin, length, num2);
+			num2 = calculate(cal, begin, length, num2);
+		}
+		else if (cal[*begin] == '+')
+		{
+			(*begin)++;
+			return num1 + num2;
+		}
+		else if (cal[*begin] == '-')
+		{
+			(*begin)++;
+			return num1 - num2;
+		}
+		else if (cal[*begin] == '*')
+		{
+			(*begin)++;
+			return num1 * num2;
+		}
+		else if (cal[*begin] == '/')
+		{
+			(*begin)++;
+			return num1 / num2;
+		}
+		else if (cal[*begin] == '^')
+		{
+			(*begin)++;
+			return (int)pow((double)num1,(double)num2);
+		}
+		else if (cal[*begin] == '!')
+		{
+			(*begin)++;
+			int temp = 1;
+			for (int i = 1;i <= num2;i++)
+			{
+				temp *= i;
+			}
+			num2 = temp;
 		}
 	}
-	return num1;
+	return num1 + num2;
 }
