@@ -12,7 +12,8 @@ int calculate(char *, int*, int, int);
 int main()
 {
 	std::cout << "支持整数的+加-减*乘/除()括号^幂!阶乘运算" << std::endl;
-	std::cout << "-2147483648----2147483647\n负数请写(0-x)比如-1就写(0-1)" << std::endl;
+	std::cout << "整数范围：-2147483648----2147483647" << std::endl;
+	std::cout << "负数请写(0-x)比如-1就写(0-1)" << std::endl;
 	std::cout << "优先级：括号>阶乘=幂>乘除>加减" << std::endl;
 	std::cout << "请输入算式：";
 	char *c1 = new char[500], *c2 = new char[1000];
