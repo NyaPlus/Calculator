@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <iostream>
 #include <Windows.h>
 #include <math.h>
 
@@ -10,9 +11,9 @@ int calculate(char *, int*, int, int);
 
 int main()
 {
-	printf("支持整数的+加-减*乘/除()括号^幂!阶乘\n优先级：括号>阶乘=幂>乘除>加减\n请输入算式：");
+	printf("支持整数的+加-减*乘/除()括号^幂!阶乘运算\n可显示的数值范围：-2147483648----2147483647\n负数请写(0-x)比如-1就写(0-1)\n优先级：括号>阶乘=幂>乘除>加减\n请输入算式：");
 	char *c1 = new char[500], *c2 = new char[1000];
-	scanf("%s", c1);
+	std::cin >> c1;
 	char error;
 	int *fromnum = new int, *tonum = new int;
 	*fromnum = 0;
@@ -22,19 +23,19 @@ int main()
 	{
 	case 1:
 		*fromnum = 0;
-		printf("结果=%d\n", calculate(c2, fromnum, *tonum, 0));
+		std::cout << "结果=" << calculate(c2, fromnum, *tonum, 0) << std::endl;
 		break;
 	case 2:
-		printf("错误：缺少括号\")\"\n");
+		std::cout << "错误：缺少括号\")\"" << std::endl;
 		break;
 	case 3:
-		printf("错误：存在多余的括号\")\"\n");
+		std::cout << "错误：存在多余的括号\")\"" << std::endl;
 		break;
 	case 4:
-		printf("错误：表达式错误，位于第%d个字符\n", (*fromnum)+1);
+		std::cout << "错误：表达式错误，位于第" << (*fromnum) + 1 << "个字符" << std::endl;
 		break;
 	default:
-		printf("错误：检测到非法字符\"%c\"，位于第%d个字符\n", error, (*fromnum)+1);
+		std::cout << "错误：检测到非法字符\"" << error << "\"，位于第" << (*fromnum) + 1 << "个字符" << std::endl;
 		break;
 	}
 	system("pause");
